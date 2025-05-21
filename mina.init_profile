@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+source ./mina.env
+
+sudo rm -rf $MINA_DIR
+mkdir $MINA_DIR
+
+MINA_KEYS_DIR="$MINA_DIR/keys"
+MINA_CONFIG_DIR="$MINA_DIR/mina-config"
+
+mkdir $MINA_KEYS_DIR
+mkdir $MINA_CONFIG_DIR
+
+chmod 700 $MINA_KEYS_DIR
+
+mina.cli advanced generate-keypair --privkey-path /keys/my-wallet
+
+chmod 600 $MINA_KEYS_DIR/my-wallet
+
+read -s -p "Enter password the 3rd time for generating configs: " MINA_PRIVKEY_PASS
+
+cat > $MINA_DIR/mina-env <<EOF
+export MINA_PRIVKEY_PASS=$MINA_PRIVKEY_PASS
+LOG_LEVEL=Info
+FILE_LOG_LEVEL=Debug
+MINA_BP_PRIVKEY=$MINA_KEYS_DIR/my-wallet
+PEER_LIST_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
+EOF
+
+source $MINA_DIR/mina-env
+
+PUBLICKEY=$(< $MINA_KEYS_DIR/my-wallet.pub)
+
+cat > $MINA_CONFIG_DIR/daemon.json <<EOF
+{
+  "daemon": {
+    "client-port": 1000,
+    "external-port": 1001,
+    "rest-port": 1002,
+    "block-producer-key": "$MINA_BP_PRIVKEY",
+    "block-producer-password": "$MINA_PRIVKEY_PASS",
+    "block-producer-pubkey": "$PUBLICKEY",
+    "coinbase-receiver": "$PUBLICKEY",
+    "log-block-creation": false,
+    "log-received-blocks": false,
+    "log-snark-work-gossip": false,
+    "log-txn-pool-gossip": false,
+    "peers": ["seed-one.o1test.net", "seed-two.o1test.net"],
+    "run-snark-worker": "$PUBLICKEY",
+    "snark-worker-fee": 10,
+    "snark-worker-parallelism": 1,
+    "work-reassignment-wait": 420000,
+    "work-selection": "seq"
+  }
+}
+EOF

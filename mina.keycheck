@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source ./mina.env
+
+mina.cli advanced validate-keypair --privkey-path /keys/my-wallet

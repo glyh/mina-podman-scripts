@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source ./mina.env
+
+podman pull $MINA_DOCKER_TAG 

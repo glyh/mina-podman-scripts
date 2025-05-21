@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+source ./mina.env
+
+exec podman run -it --rm --entrypoint "" --volume $MINA_DIR/keys:/keys \
+  $MINA_DOCKER_TAG \
+  mina "$@"

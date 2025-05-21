@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source ./mina.env
+
+exec podman run --name mina-$MINA_PROFILE-block-producer -d \
+  -p 8302:8302 \
+  --restart=always \
+  --mount "type=bind,source=$MINA_DIR/mina-env,dst=/entrypoint.d/mina-env,readonly" \
+  --mount "type=bind,source=$MINA_DIR/keys,dst=/keys,readonly" \
+  --mount "type=bind,source=$MINA_DIR/mina-config,dst=/root/.mina-config" \
+  $MINA_DOCKER_TAG \
+  daemon
